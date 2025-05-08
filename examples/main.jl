@@ -21,8 +21,6 @@ max_N_t = 5000
 X = collect(randn(rng, T, D) for _ in 1:N)
 
 # # Levels: 1
-#levels = 5 # 2^(levels-1) leaf nodes. Must be larger than 1.
-
 levels = 2 # 2^(levels-1) leaf nodes. Must be larger than 1.
 s_tree = ST.PCTree(X, levels)
 X_parts, X_parts_inds = ST.label_leaf_nodes(s_tree, X)
@@ -36,7 +34,6 @@ fig_num, _ = visualize2Dpartition(X_parts, y_set, t_set, fig_num, "levels = $(le
 
 boundary_pts = PK.generate_pseudo_obs(X, s_tree)
 p_obs = boundary_pts[1:25:end] # definite discontinuity.
-#p_obs = boundary_pts[1:end] # almost no discontinuity.
 PLT.plot(map(xx -> first(xx), p_obs), map(xx -> last(xx), p_obs), "x", label = "pseudo obs")
 PLT.legend()
 
@@ -52,14 +49,7 @@ y = vcat(y1, y2)
 #### patchwork kriging
 
 
-#xq = randn(rng, T, D)
-#xq = [T(1.32); T(2.52)]
-
-# # debug
-# p_obs = p_obs[1:1]
-xq = X[34]
-
-#θs = [PK.SqExp(T(20)); PK.SqExp(T(15))]
+# use the same square exponential bandwidth of 20 for both regions.
 θs = [PK.SqExp(T(20)); PK.SqExp(T(20))]
 ps = PK.GPParameters(X_parts, s_tree, θs)
 
@@ -67,6 +57,9 @@ K_XX = PK.compute_K_XX(ps)
 K_Xδ = PK.compute_K_Xδ(p_obs, ps)
 K_δδ = PK.compute_K_δδ(p_obs, ps)
 
+# # sanity-check
+xq = X[34]
+#xq = randn(rng, T, D)
 K_Xq = PK.compute_K_Xq(xq, ps)
 K_δq = PK.compute_K_δq(xq, p_obs, ps)
 K_qq = PK.compute_K_qq(xq, ps)
@@ -74,7 +67,6 @@ K_qq = PK.compute_K_qq(xq, ps)
 K_qX = K_Xq'
 K_qδ = K_δq'
 
-#k = ST.find_partition(xq, ps.tree)
 tmp = K_δδ \ (K_Xδ')
 tmp1 = (K_qX - K_qδ * tmp)
 tmp2 = (K_XX - K_Xδ * tmp)
@@ -143,7 +135,6 @@ function query_line_rkhs(lb::T, ub::T, y_val::T, Nq::Integer, model) where {T}
 end
 
 y_rkhs = f_oracle.(X)
-σ² = T(1.0e-8)
 σ² = T(1.0e-8)
 θ = θs[1]
 model_rkhs = PK.RKHSModel(X, y_rkhs, σ², θ)

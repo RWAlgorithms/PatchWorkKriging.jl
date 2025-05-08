@@ -1,6 +1,8 @@
 # PatchWorkKriging.jl
 Based on the article from [http://jmlr.org/papers/v19/17-042.html](http://jmlr.org/papers/v19/17-042.html).
 
+Only two regions are allowed in this implementation.
+
 # License
 This project is licensed under the GNU Affero General Public License v3.0; see the LICENSE file for details. Individual source files may contain the following tag instead of the full license text:
 ```
